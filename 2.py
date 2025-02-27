@@ -5,12 +5,13 @@ import pandas as pd
 import plotly.express as px
 from groq import Groq
 from googleapiclient.discovery import build
+from dotenv import load_dotenv
 
-# Initialize Groq Client
-client = Groq(api_key="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")
+load_dotenv()  # Load environment variables from .env
 
-# Initialize YouTube API Client
-YOUTUBE_API_KEY = "AIzaSyA3sdpIHpHxs04ep-2bKFtM4HtsGoq9ySw"
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
+
 youtube = build('youtube', 'v3', developerKey=YOUTUBE_API_KEY)
 
 def generate_checklist(topic):
@@ -21,7 +22,8 @@ def generate_checklist(topic):
         stream=False,
     )
     checklist=chat_completion.choices[0].message.content.split("\n")
-    checklist = [item.strip() for item in checklist if item.strip() and not item.lower().startswith("here's a")]
+    checklist = [item.strip() for item in checklist if item.strip() and not item.lower().startswith("Here's a")]
+    checklist.pop(0)
     return checklist
 
 def get_best_youtube_video(query):
