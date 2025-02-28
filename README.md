@@ -27,7 +27,7 @@ GROQ_API_KEY=your_groq_api_key
 YOUTUBE_API_KEY=your_youtube_api_key
 
 4. Finally Run the App with 
-  streamlit run with_quiz.py
+  streamlit run 2.py
 
 Features
 Generate study checklists
