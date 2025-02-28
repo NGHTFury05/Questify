@@ -1,30 +1,40 @@
-/# Get the number of rows for the triangl.py
-/.venv
-/.vscode
-/a=[].py
-/attempt1.py
-/build_faiss_index.py
-/check1.py
-/embedding res.py
-/embeddings.npy
-/embedings.npy
-/faiss_index.bin
-/hello
-/hellocpp.cpp
-/hellocpp.exe
-/helloworld.cpp
-/helloworld.exe
-/import client.py
-/import socket.py
-/import sys.py
-/linked list practice.py
-/MMS.py
-/OIP.jpeg
-/processed_data.csv
-/recomend.py
-/Untitled-1.cpp
-/Untitled-1.exe
-/Zomato Chennai Listing 2020.csv
-/__pycache__
-.env
+# Editor and environment
+.vscode
+.venv
+.env  # Crucial: keeps API keys private
 
+# Python bytecode and caches
+__pycache__
+*.pyc
+
+# Compiled binaries
+*.exe
+
+# Temporary or experimental files
+a=[].py
+attempt1.py
+check1.py
+hello
+hellocpp.cpp
+hellocpp.exe
+helloworld.cpp
+helloworld.exe
+import client.py
+import socket.py
+import sys.py
+linked list practice.py
+Untitled-1.cpp
+Untitled-1.exe
+
+# Data and ML-related files
+embeddings.npy
+embedings.npy
+faiss_index.bin
+processed_data.csv
+Zomato Chennai Listing 2020.csv
+build_faiss_index.py
+
+# Project-specific
+OIP.jpeg
+recomend.py
+MMS.py
