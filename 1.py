@@ -296,8 +296,10 @@ def display_quiz():
         for i, q in enumerate(quiz, 1):
             st.markdown(f"""
             <div class="quiz-question">
-                <h4>Question {i}: {q['question']}</h4>
-                <p><small>Topic: {q.get('topic', 'General')}</small></p>
+                <h4 style="margin: 0 0 1rem 0; color: #2c3e50;">Question {i}: {q['question']}</h4>
+                <p style="margin: 0 0 1rem 0; color: #666; font-size: 0.9rem;">
+                    <strong>Topic:</strong> {q.get('topic', 'General')}
+                </p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -357,19 +359,47 @@ def display_quiz_results():
     percentage = (score / len(quiz)) * 100
     st.session_state["quiz_scores"].append(percentage)
     
+    # Enhanced score display with metric cards
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.metric("Score", f"{score}/{len(quiz)}")
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3>🎯 Score</h3>
+            <h2>{score}/{len(quiz)}</h2>
+        </div>
+        """, unsafe_allow_html=True)
+    
     with col2:
-        st.metric("Percentage", f"{percentage:.1f}%")
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3>📊 Percentage</h3>
+            <h2>{percentage:.1f}%</h2>
+        </div>
+        """, unsafe_allow_html=True)
+    
     with col3:
         if percentage >= 80:
-            st.success("🎉 Excellent!")
+            st.markdown("""
+            <div class="metric-card" style="background: linear-gradient(135deg, #4CAF50, #45a049);">
+                <h3>🏆 Result</h3>
+                <h2>🎉 Excellent!</h2>
+            </div>
+            """, unsafe_allow_html=True)
         elif percentage >= 60:
-            st.info("👍 Good job!")
+            st.markdown("""
+            <div class="metric-card" style="background: linear-gradient(135deg, #2196F3, #1976D2);">
+                <h3>🏆 Result</h3>
+                <h2>👍 Good job!</h2>
+            </div>
+            """, unsafe_allow_html=True)
         else:
-            st.warning("📚 Keep studying!")
+            st.markdown("""
+            <div class="metric-card" style="background: linear-gradient(135deg, #FF9800, #F57C00);">
+                <h3>🏆 Result</h3>
+                <h2>📚 Keep studying!</h2>
+            </div>
+            """, unsafe_allow_html=True)
     
     # Detailed results
     st.subheader("📋 Detailed Results")
@@ -378,20 +408,47 @@ def display_quiz_results():
         q = quiz[i-1]
         is_correct = result["Correct"]
         
-        with st.expander(f"Question {i} - {'✅ Correct' if is_correct else '❌ Incorrect'}"):
-            st.write(f"**Question:** {q['question']}")
-            st.write(f"**Your Answer:** {result['User Answer']}")
-            st.write(f"**Correct Answer:** {result['Correct Answer']}")
-            st.write(f"**Topic:** {result['Topic']}")
+        # Enhanced result display
+        status_icon = "✅" if is_correct else "❌"
+        status_text = "Correct" if is_correct else "Incorrect"
+        status_color = "#4CAF50" if is_correct else "#F44336"
+        
+        st.markdown(f"""
+        <div style="background: white; padding: 1.5rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin: 1rem 0; border-left: 5px solid {status_color};">
+            <h4 style="margin: 0 0 1rem 0; color: {status_color};">
+                {status_icon} Question {i} - {status_text}
+            </h4>
+            <div style="margin-bottom: 0.5rem;">
+                <strong style="color: #2c3e50;">Question:</strong> {q['question']}
+            </div>
+            <div style="margin-bottom: 0.5rem;">
+                <strong style="color: #2c3e50;">Your Answer:</strong> 
+                <span style="color: {'#4CAF50' if is_correct else '#F44336'}; font-weight: 600;">
+                    {result['User Answer']}
+                </span>
+            </div>
+            <div style="margin-bottom: 0.5rem;">
+                <strong style="color: #2c3e50;">Correct Answer:</strong> 
+                <span style="color: #4CAF50; font-weight: 600;">
+                    {result['Correct Answer']}
+                </span>
+            </div>
+            <div style="margin-bottom: 0.5rem;">
+                <strong style="color: #2c3e50;">Topic:</strong> {result['Topic']}
+            </div>
             
-            if not is_correct:
-                st.markdown("💡 **Study Tip:** Review this topic in your checklist!")
+            {f'<div style="margin-top: 1rem; padding: 1rem; background: rgba(255, 193, 7, 0.1); border-radius: 10px; border-left: 4px solid #FFC107;"><strong>💡 Study Tip:</strong> Review this topic in your checklist!</div>' if not is_correct else ''}
+        </div>
+        """, unsafe_allow_html=True)
     
-    # Action buttons
+    # Action buttons with enhanced styling
+    st.markdown("---")
+    st.subheader("🎯 Next Steps")
+    
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        if st.button("🔄 Retake Quiz"):
+        if st.button("🔄 Retake Quiz", type="primary", use_container_width=True):
             # Reset quiz state
             st.session_state["quiz"] = generate_quiz(
                 st.session_state["topic"],
@@ -404,12 +461,12 @@ def display_quiz_results():
             st.rerun()
     
     with col2:
-        if st.button("📝 Back to Checklist"):
+        if st.button("📝 Back to Checklist", type="secondary", use_container_width=True):
             st.session_state["show_quiz"] = False
             st.rerun()
     
     with col3:
-        if st.button("🆕 New Quiz"):
+        if st.button("🆕 New Quiz", type="primary", use_container_width=True):
             st.session_state["show_quiz"] = False
             st.session_state["quiz"] = None
             st.session_state["answers"] = {}
@@ -449,17 +506,46 @@ def study_checklist():
     if st.session_state["checklist"]:
         st.subheader(f"📋 Study Checklist for: {st.session_state['topic']}")
         
-        # Progress overview
+        # Progress overview with enhanced styling
         completed = sum(st.session_state["progress"].values())
         total = len(st.session_state["progress"])
+        progress_percent = (completed / total * 100) if total > 0 else 0
         
-        col1, col2 = st.columns([2, 1])
+        # Progress metrics
+        col1, col2, col3 = st.columns([2, 1, 1])
+        
         with col1:
-            st.progress(completed / total if total > 0 else 0)
-            st.write(f"Progress: {completed}/{total} topics completed ({(completed/total*100):.1f}%)")
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 1.5rem; border-radius: 15px; border: 1px solid #dee2e6;">
+                <h4 style="margin: 0 0 1rem 0; color: #2c3e50;">📊 Progress Overview</h4>
+                <div style="margin-bottom: 1rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                        <span style="color: #666;">Progress</span>
+                        <span style="color: #2c3e50; font-weight: 600;">{progress_percent:.1f}%</span>
+                    </div>
+                    <div style="background: #e9ecef; height: 8px; border-radius: 4px; overflow: hidden;">
+                        <div style="background: linear-gradient(90deg, #4CAF50, #45a049); height: 100%; width: {progress_percent}%; transition: width 0.3s ease;"></div>
+                    </div>
+                </div>
+                <p style="margin: 0; color: #666; font-size: 0.9rem;">
+                    {completed}/{total} topics completed
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
         
         with col2:
-            if st.button("🔄 Regenerate Checklist"):
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); padding: 1.5rem; border-radius: 15px; border: 1px solid #90caf9; text-align: center;">
+                <h4 style="margin: 0 0 0.5rem 0; color: #1976d2;">🎯 Status</h4>
+                <p style="margin: 0; color: #1976d2; font-weight: 600; font-size: 1.2rem;">
+                    {completed}/{total}
+                </p>
+                <p style="margin: 0; color: #1976d2; font-size: 0.9rem;">Completed</p>
+            </div>
+            """, unsafe_allow_html=True)
+        
+        with col3:
+            if st.button("🔄 Regenerate", type="secondary", use_container_width=True):
                 st.session_state["checklist"] = []
                 st.session_state["progress"] = {}
                 st.rerun()
@@ -468,25 +554,38 @@ def study_checklist():
         for i, item in enumerate(st.session_state["checklist"]):
             is_completed = st.session_state["progress"].get(item, False)
             
-            with st.container():
-                col1, col2 = st.columns([3, 1])
-                
-                with col1:
-                    new_status = st.checkbox(
-                        f"**{item}**",
-                        value=is_completed,
-                        key=f"checkbox_{i}"
-                    )
-                    
-                    if new_status != is_completed:
-                        st.session_state["progress"][item] = new_status
-                        st.rerun()
-                
-                with col2:
-                    if item in st.session_state["youtube_links"]:
-                        st.markdown(f"[📺 Video]({st.session_state['youtube_links'][item]})")
-                    else:
-                        st.write("🔍 No video")
+            # Apply enhanced styling based on completion status
+            card_class = "study-card completed" if is_completed else "study-card"
+            
+            st.markdown(f"""
+            <div class="{card_class}">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="flex: 1;">
+                        <h4 style="margin: 0 0 0.5rem 0; color: {'#2196F3' if is_completed else '#2c3e50'};">
+                            {item}
+                        </h4>
+                        <p style="margin: 0; color: #666; font-size: 0.9rem;">
+                            {'✅ Completed' if is_completed else '⏳ Pending'}
+                        </p>
+                    </div>
+                    <div style="text-align: right;">
+                        {f'<a href="{st.session_state["youtube_links"][item]}" target="_blank" style="text-decoration: none; color: #007bff;">📺 Video</a>' if item in st.session_state["youtube_links"] else '<span style="color: #999;">🔍 No video</span>'}
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Hidden checkbox for state management
+            new_status = st.checkbox(
+                f"Mark as completed",
+                value=is_completed,
+                key=f"checkbox_{i}",
+                label_visibility="collapsed"
+            )
+            
+            if new_status != is_completed:
+                st.session_state["progress"][item] = new_status
+                st.rerun()
         
         # Visual progress
         if total > 0:
@@ -498,34 +597,232 @@ def study_checklist():
             fig = px.pie(progress_data, names="Status", values="Count", title="Progress Overview")
             st.plotly_chart(fig, use_container_width=True)
 
+# Progress Dashboard Function
+def progress_dashboard():
+    st.subheader("📊 Progress Dashboard")
+    
+    if not st.session_state.get("checklist"):
+        st.info("📝 Please generate a study checklist first to view your progress!")
+        return
+    
+    # Overview Metrics
+    completed = sum(st.session_state["progress"].values())
+    total = len(st.session_state["progress"])
+    progress_percent = (completed / total * 100) if total > 0 else 0
+    
+    # Metric Cards
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3>📚 Total Topics</h3>
+            <h2>{total}</h2>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3>✅ Completed</h3>
+            <h2>{completed}</h2>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3>📈 Progress</h3>
+            <h2>{progress_percent:.1f}%</h2>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        remaining = total - completed
+        st.markdown(f"""
+        <div class="metric-card">
+            <h3>⏳ Remaining</h3>
+            <h2>{remaining}</h2>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("---")
+    
+    # Progress Visualization
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.subheader("📊 Progress Overview")
+        
+        # Progress bar
+        st.progress(progress_percent / 100)
+        st.write(f"Overall Progress: {progress_percent:.1f}%")
+        
+        # Progress chart
+        progress_data = pd.DataFrame({
+            "Status": ["Completed", "Remaining"],
+            "Count": [completed, remaining],
+            "Color": ["#4CAF50", "#FF9800"]
+        })
+        
+        fig = px.pie(progress_data, names="Status", values="Count", 
+                    title="Progress Distribution",
+                    color_discrete_map={"Completed": "#4CAF50", "Remaining": "#FF9800"})
+        fig.update_traces(textposition='inside', textinfo='percent+label')
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col2:
+        st.subheader("🎯 Quick Actions")
+        
+        if st.button("🔄 Reset Progress", type="secondary"):
+            st.session_state["progress"] = {item: False for item in st.session_state["checklist"]}
+            st.success("Progress reset successfully!")
+            st.rerun()
+        
+        if st.button("📝 Back to Checklist", type="primary"):
+            st.session_state["current_page"] = "checklist"
+            st.rerun()
+    
+    st.markdown("---")
+    
+    # Detailed Progress Table
+    st.subheader("📋 Detailed Progress")
+    
+    progress_df = pd.DataFrame([
+        {
+            "Topic": item,
+            "Status": "✅ Completed" if st.session_state["progress"].get(item, False) else "⏳ Pending",
+            "Progress": "100%" if st.session_state["progress"].get(item, False) else "0%"
+        }
+        for item in st.session_state["checklist"]
+    ])
+    
+    st.dataframe(progress_df, use_container_width=True)
+    
+    # Quiz Performance (if available)
+    if st.session_state.get("quiz_scores"):
+        st.markdown("---")
+        st.subheader("🧠 Quiz Performance")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            avg_score = sum(st.session_state["quiz_scores"]) / len(st.session_state["quiz_scores"])
+            st.metric("Average Quiz Score", f"{avg_score:.1f}%")
+            
+            if avg_score >= 80:
+                st.success("🎉 Excellent performance!")
+            elif avg_score >= 60:
+                st.info("👍 Good job!")
+            else:
+                st.warning("📚 Keep studying!")
+        
+        with col2:
+            # Quiz score trend
+            if len(st.session_state["quiz_scores"]) > 1:
+                scores_df = pd.DataFrame({
+                    "Quiz": range(1, len(st.session_state["quiz_scores"]) + 1),
+                    "Score": st.session_state["quiz_scores"]
+                })
+                
+                fig = px.line(scores_df, x="Quiz", y="Score", 
+                            title="Quiz Score Trend",
+                            markers=True)
+                fig.update_layout(yaxis_title="Score (%)", xaxis_title="Quiz Number")
+                st.plotly_chart(fig, use_container_width=True)
+
 # Main Application
 def main():
     # FIXED: Initialize session state first
     initialize_session_state()
     
-    # Header
+    # Header with enhanced styling
     st.markdown("""
-    <div class="main-header">
+    <div class="main-header fade-in">
         <h1>📚 StudyHub - Smart Learning Platform</h1>
         <p>Your AI-powered companion for effective studying and skill development</p>
+        <div style="margin-top: 1rem; opacity: 0.8;">
+            <span style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 20px; margin: 0 0.5rem;">
+                🎯 Personalized Learning
+            </span>
+            <span style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 20px; margin: 0 0.5rem;">
+                📊 Progress Tracking
+            </span>
+            <span style="background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 20px; margin: 0 0.5rem;">
+                🧠 AI-Powered Quizzes
+            </span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
     
-    # Sidebar Navigation
+    # Enhanced Sidebar Navigation
     with st.sidebar:
-        st.title("🎯 Navigation")
+        st.markdown("""
+        <div style="text-align: center; padding: 1rem 0;">
+            <h2 style="color: white; margin-bottom: 1rem;">🎯 StudyHub</h2>
+            <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                <p style="color: white; margin: 0; font-size: 0.9rem;">Current Topic</p>
+                <p style="color: #4CAF50; font-weight: bold; margin: 0;">{}</p>
+            </div>
+        </div>
+        """.format(st.session_state.get("topic", "None Selected")), unsafe_allow_html=True)
         
-        # Navigation
+        st.markdown("---")
+        
+        # Navigation with icons and better styling
+        st.markdown("### 🧭 Navigation")
+        
         page = st.selectbox(
             "Choose a section:",
-            ["📝 Study Checklist", "🎯 Quiz Center"]
+            ["📝 Study Checklist", "🎯 Quiz Center", "📊 Progress Dashboard"],
+            label_visibility="collapsed"
         )
+        
+        st.markdown("---")
+        
+        # Quick Stats
+        if st.session_state.get("checklist"):
+            completed = sum(st.session_state["progress"].values())
+            total = len(st.session_state["progress"])
+            progress_percent = (completed / total * 100) if total > 0 else 0
+            
+            st.markdown("### 📈 Quick Stats")
+            st.markdown(f"""
+            <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                <p style="color: white; margin: 0; font-size: 0.9rem;">Progress</p>
+                <p style="color: #4CAF50; font-weight: bold; margin: 0; font-size: 1.5rem;">{progress_percent:.1f}%</p>
+                <p style="color: rgba(255,255,255,0.8); margin: 0; font-size: 0.8rem;">{completed}/{total} completed</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Progress bar
+            st.progress(completed / total if total > 0 else 0)
+        
+        # User Points and Streak
+        if st.session_state.get("user_points", 0) > 0:
+            st.markdown("### 🏆 Achievements")
+            st.markdown(f"""
+            <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px; margin-bottom: 1rem;">
+                <p style="color: white; margin: 0; font-size: 0.9rem;">Points</p>
+                <p style="color: #FFD700; font-weight: bold; margin: 0; font-size: 1.2rem;">{st.session_state['user_points']} pts</p>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            if st.session_state.get("study_streak", 0) > 0:
+                st.markdown(f"""
+                <div style="background: rgba(255,255,255,0.1); padding: 1rem; border-radius: 10px;">
+                    <p style="color: white; margin: 0; font-size: 0.9rem;">Study Streak</p>
+                    <p style="color: #FF6B6B; font-weight: bold; margin: 0; font-size: 1.2rem;">🔥 {st.session_state['study_streak']} days</p>
+                </div>
+                """, unsafe_allow_html=True)
     
     # Main content based on navigation
     if page == "📝 Study Checklist":
         study_checklist()
     elif page == "🎯 Quiz Center":
         quiz_center()
+    elif page == "📊 Progress Dashboard":
+        progress_dashboard()
 
 if __name__ == "__main__":
     main()
