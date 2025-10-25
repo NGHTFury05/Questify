@@ -1,7 +1,8 @@
 # Editor and environment
 .vscode
 .venv
-.env  # Crucial: keeps API keys private
+# Keep API keys private
+.env
 
 # Python bytecode and caches
 __pycache__
